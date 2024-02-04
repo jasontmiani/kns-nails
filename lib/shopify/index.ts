@@ -16,7 +16,7 @@ import {
   getCollectionQuery,
   getCollectionsQuery
 } from './queries/collection';
-import { getMenuQuery } from './queries/menu';
+import { getFooterMenuQuery, getHeaderMenuQuery } from './queries/menu';
 import { getPageQuery, getPagesQuery } from './queries/page';
 import {
   getProductQuery,
@@ -337,13 +337,23 @@ export async function getCollections(): Promise<Collection[]> {
   return collections;
 }
 
-export async function getMenu(handle: string): Promise<Menu[]> {
+export async function getHeaderMenu(handle: string): Promise<Menu[]> {
   const res = await shopifyFetch<ShopifyMenuOperation>({
-    query: getMenuQuery,
-    tags: [TAGS.collections],
-    variables: {
-      handle
-    }
+    query: getHeaderMenuQuery,
+    tags: [TAGS.collections]
+  });
+
+  return (
+    res.body?.data?.menu?.items.map((item: { title: string; url: string }) => ({
+      title: item.title,
+      path: item.url.replace(domain, '').replace('/collections', '/search').replace('/pages', '')
+    })) || []
+  );
+}
+export async function getFooterMenu(handle: string): Promise<Menu[]> {
+  const res = await shopifyFetch<ShopifyMenuOperation>({
+    query: getFooterMenuQuery,
+    tags: [TAGS.collections]
   });
 
   return (
